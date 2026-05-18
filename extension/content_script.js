@@ -17,6 +17,12 @@ const URL_KEYWORDS = [
   "agreement", "cookies", "tos", "tos-", "data-use",
 ];
 
+// Backend URL — loaded from storage, falls back to default
+let _backendUrl = "http://127.0.0.1:8000";
+chrome.storage.sync.get({ backendUrl: "http://127.0.0.1:8000" }, (result) => {
+  _backendUrl = result.backendUrl;
+});
+
 // ─── Page Detection ──────────────────────────────────────────────────────────
 
 function isToSPage() {
@@ -55,7 +61,6 @@ function isVisible(el) {
 }
 
 function extractVisibleText() {
-  // Prefer semantic content roots if present
   const root =
     document.querySelector("main, article, [role='main'], #content, .content, #main, .main") ||
     document.body;
@@ -69,7 +74,6 @@ function extractVisibleText() {
           if (shouldSkipElement(node)) return NodeFilter.FILTER_REJECT;
           return NodeFilter.FILTER_SKIP;
         }
-        // Text node
         const text = node.textContent.trim();
         if (!text) return NodeFilter.FILTER_REJECT;
         const parent = node.parentElement;
@@ -89,10 +93,12 @@ function extractVisibleText() {
 
 // ─── Script Loaders ──────────────────────────────────────────────────────────
 
-let _overlayLoaded = false;
-
 function ensureOverlayScript(callback) {
-  if (_overlayLoaded) { callback(); return; }
+  // Guard against duplicate injection
+  if (document.getElementById("tos-overlay-script")) {
+    callback();
+    return;
+  }
   if (!document.getElementById("tos-clarity-css")) {
     const link = document.createElement("link");
     link.id  = "tos-clarity-css";
@@ -101,8 +107,9 @@ function ensureOverlayScript(callback) {
     (document.head || document.documentElement).appendChild(link);
   }
   const script = document.createElement("script");
+  script.id  = "tos-overlay-script";
   script.src = chrome.runtime.getURL("overlay.js");
-  script.onload = () => { _overlayLoaded = true; callback(); };
+  script.onload = () => callback();
   (document.head || document.documentElement).appendChild(script);
 }
 
@@ -118,7 +125,7 @@ document.addEventListener("tos-popup-analyze-request", () => {
   const text = extractVisibleText();
   const url  = window.location.href;
 
-  fetch("http://127.0.0.1:8000/analyze", {
+  fetch(`${_backendUrl}/analyze`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ url, text }),
@@ -129,7 +136,9 @@ document.addEventListener("tos-popup-analyze-request", () => {
     })
     .then(data => {
       ensureOverlayScript(() => {
-        document.dispatchEvent(new CustomEvent("tos-clarity-show", { detail: data }));
+        if (document.body) {
+          document.dispatchEvent(new CustomEvent("tos-clarity-show", { detail: data }));
+        }
       });
       document.dispatchEvent(new CustomEvent("tos-popup-status", {
         detail: { type: "success", message: "Review ready. See the panel." },
@@ -138,7 +147,7 @@ document.addEventListener("tos-popup-analyze-request", () => {
     .catch(err => {
       const msg = err.message || "Unknown error";
       const friendly = (msg.includes("fetch") || msg.includes("Failed"))
-        ? "Backend not reachable. Is the server running on port 8000?"
+        ? "Backend not reachable. Is the server running?"
         : `Error: ${msg}`;
       document.dispatchEvent(new CustomEvent("tos-popup-status", {
         detail: { type: "error", message: friendly },
@@ -158,7 +167,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     const text = extractVisibleText();
     const url  = window.location.href;
 
-    fetch("http://127.0.0.1:8000/analyze", {
+    fetch(`${_backendUrl}/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url, text }),
@@ -169,7 +178,9 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       })
       .then(data => {
         ensureOverlayScript(() => {
-          document.dispatchEvent(new CustomEvent("tos-clarity-show", { detail: data }));
+          if (document.body) {
+            document.dispatchEvent(new CustomEvent("tos-clarity-show", { detail: data }));
+          }
         });
         sendResponse({ success: true });
       })

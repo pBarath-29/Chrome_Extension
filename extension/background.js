@@ -2,10 +2,15 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log("ToS Clarity installed.");
 });
 
+// Per-tab injection lock to prevent duplicate scripts on rapid double-clicks
+const _injecting = new Set();
+
 chrome.action.onClicked.addListener(async (tab) => {
   if (!tab.id) return;
+  if (_injecting.has(tab.id)) return;
+  _injecting.add(tab.id);
+
   try {
-    // Check if popup script is already loaded in MAIN world
     const [{ result: loaded }] = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: () => !!window._tcpLoaded,
@@ -24,7 +29,6 @@ chrome.action.onClicked.addListener(async (tab) => {
       });
     }
 
-    // Toggle the popup
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: () => document.dispatchEvent(new CustomEvent("tos-popup-toggle")),
@@ -32,5 +36,7 @@ chrome.action.onClicked.addListener(async (tab) => {
     });
   } catch (e) {
     console.warn("ToS Clarity: cannot inject into this page.", e.message);
+  } finally {
+    _injecting.delete(tab.id);
   }
 });

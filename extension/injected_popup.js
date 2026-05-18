@@ -47,7 +47,7 @@ function _tcpCreate() {
     </button>
     <div id="tcp-status" class="tcp-status-msg"></div>
     <hr class="tcp-divider" />
-    <div class="tcp-footer">Runs locally on your device</div>
+    <div class="tcp-footer">Powered by Groq</div>
   `;
 
   document.body.appendChild(panel);
@@ -56,12 +56,19 @@ function _tcpCreate() {
   requestAnimationFrame(() => requestAnimationFrame(() => panel.classList.add("tcp-open")));
 
   document.getElementById("tcp-analyze-btn").addEventListener("click", () => {
-    const btn = document.getElementById("tcp-analyze-btn");
-    btn.disabled = true;
-    btn.querySelector(".tcp-btn-label").textContent = "Analyzing…";
-    btn.querySelector(".tcp-btn-desc").textContent  = "Reading document…";
-    _tcpSetStatus("", "");
-    document.dispatchEvent(new CustomEvent("tos-popup-analyze-request"));
+    try {
+      const btn = document.getElementById("tcp-analyze-btn");
+      if (!btn) return;
+      const labelEl = btn.querySelector(".tcp-btn-label");
+      const descEl  = btn.querySelector(".tcp-btn-desc");
+      btn.disabled = true;
+      if (labelEl) labelEl.textContent = "Analyzing…";
+      if (descEl)  descEl.textContent  = "This may take 15–30 seconds";
+      _tcpSetStatus("", "");
+      document.dispatchEvent(new CustomEvent("tos-popup-analyze-request"));
+    } catch (e) {
+      console.warn("ToS Clarity: analyze dispatch failed", e);
+    }
   });
 
   document.addEventListener("mousedown", _tcpOutsideClick);

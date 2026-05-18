@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ToS Clarity — Privacy Policy</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0a0d12;
+      color: #c8d0dc;
+      padding: 48px 24px;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    h1 {
+      font-size: 22px;
+      color: #f4f6fa;
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #8896a8;
+      margin-bottom: 32px;
+    }
+
+    h2 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f4f6fa;
+      margin: 24px 0 8px;
+    }
+
+    p, li {
+      font-size: 13px;
+      color: #a8b4c4;
+    }
+
+    ul {
+      padding-left: 18px;
+      margin-top: 6px;
+    }
+
+    li { margin-bottom: 4px; }
+
+    .highlight {
+      background: rgba(196, 154, 74, 0.12);
+      border-left: 3px solid rgba(196, 154, 74, 0.50);
+      padding: 10px 14px;
+      border-radius: 0 6px 6px 0;
+      margin: 16px 0;
+      font-size: 13px;
+      color: #c8b07a;
+    }
+
+    a { color: #6a9fd0; }
+  </style>
+</head>
+<body>
+  <h1>ToS Clarity — Privacy Policy</h1>
+  <p class="subtitle">Last updated: May 2026</p>
+
+  <div class="highlight">
+    ToS Clarity does not collect, store, or sell any personal data. No account is required.
+  </div>
+
+  <h2>What data is processed</h2>
+  <p>When you click "Review Agreement", the extension:</p>
+  <ul>
+    <li>Extracts the visible text of the current page</li>
+    <li>Sends the page URL and extracted text to the backend server running on your device</li>
+  </ul>
+
+  <h2>Where your data goes</h2>
+  <p>The backend server (running at <code>127.0.0.1:8000</code> by default) forwards the document text and URL to the <strong>Groq API</strong> for analysis using a Llama model. Groq's data handling is governed by the <a href="https://groq.com/privacy-policy/" target="_blank">Groq Privacy Policy</a> and <a href="https://groq.com/terms-of-use/" target="_blank">Terms of Use</a>.</p>
+
+  <h2>What is NOT collected</h2>
+  <ul>
+    <li>No browsing history is recorded</li>
+    <li>No analysis results are stored by the extension</li>
+    <li>No data is sent to any server other than your local backend and the Gemini API</li>
+    <li>No cookies, tracking pixels, or analytics are used</li>
+  </ul>
+
+  <h2>Local backend</h2>
+  <p>The backend server runs entirely on your device. It does not persist any document text or analysis results to disk. Data exists only in memory for the duration of a single analysis request.</p>
+
+  <h2>Contact</h2>
+  <p>For questions or concerns, open an issue on the project's GitHub repository.</p>
+</body>
+</html>

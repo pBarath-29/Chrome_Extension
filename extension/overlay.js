@@ -54,10 +54,20 @@ function tosShowOverlay(data) {
   tosRemoveOverlay();
 
   const { data_collection, data_sharing, user_rights,
-          hidden_clauses, risk_scores, plain_english_explanation } = data;
+          hidden_clauses, risk_scores, plain_english_explanation,
+          summary, error } = data;
 
   const scores = risk_scores || { privacy: 0, legal: 0, lock_in: 0 };
   const hostname = (() => { try { return new URL(window.location.href).hostname; } catch (_) { return window.location.href; } })();
+
+  // Use plain_english_explanation, fall back to summary, then a default message
+  const briefText = plain_english_explanation || summary || "";
+  const errorBanner = error
+    ? `<div class="tos-error-banner">Analysis error: ${_tosEscape(error)}</div>`
+    : "";
+  const briefContent = briefText
+    ? `<div class="tos-plain-box">${_tosEscape(briefText)}</div>`
+    : `<p class="tos-empty">No legal content detected on this page. Try a Terms of Service or Privacy Policy page.</p>`;
 
   const panel = document.createElement("div");
   panel.id = "tos-clarity-overlay";
@@ -71,9 +81,11 @@ function tosShowOverlay(data) {
       <button class="tos-close" id="tos-close-btn" title="Close">&#x2715;</button>
     </div>
 
+    ${errorBanner}
+
     <div class="tos-section">
       <div class="tos-section-title">In Brief</div>
-      <div class="tos-plain-box">${_tosEscape(plain_english_explanation)}</div>
+      ${briefContent}
     </div>
 
     <hr class="tos-divider" />
@@ -106,6 +118,7 @@ function tosShowOverlay(data) {
     </div>
   `;
 
+  if (!document.body) return;
   document.body.appendChild(panel);
   document.getElementById("tos-close-btn").addEventListener("click", tosRemoveOverlay);
 
