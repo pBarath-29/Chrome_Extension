@@ -115,10 +115,12 @@ retryBtn.addEventListener("click", () => {
   });
 });
 
-privacyLink.addEventListener("click", (e) => {
-  e.preventDefault();
-  chrome.tabs.create({ url: chrome.runtime.getURL("privacy_policy.html") });
-});
+if (privacyLink) {
+  privacyLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    chrome.tabs.create({ url: chrome.runtime.getURL("privacy_policy.html") });
+  });
+}
 
 btn.addEventListener("click", () => {
   btn.disabled = true;
