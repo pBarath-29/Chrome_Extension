@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>ToS Clarity — Privacy Policy</title>
+  <title>ToS Clarity - Privacy Policy</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -33,64 +33,74 @@
       font-size: 14px;
       font-weight: 600;
       color: #f4f6fa;
-      margin: 24px 0 8px;
+      margin: 28px 0 8px;
     }
 
     p, li {
       font-size: 13px;
       color: #a8b4c4;
+      line-height: 1.7;
     }
+
+    p + p { margin-top: 10px; }
 
     ul {
       padding-left: 18px;
-      margin-top: 6px;
+      margin-top: 8px;
     }
 
-    li { margin-bottom: 4px; }
+    li { margin-bottom: 6px; }
 
     .highlight {
       background: rgba(196, 154, 74, 0.12);
       border-left: 3px solid rgba(196, 154, 74, 0.50);
-      padding: 10px 14px;
+      padding: 12px 16px;
       border-radius: 0 6px 6px 0;
-      margin: 16px 0;
+      margin: 16px 0 28px;
       font-size: 13px;
       color: #c8b07a;
     }
 
     a { color: #6a9fd0; }
+    a:hover { text-decoration: underline; }
+
+    code {
+      font-size: 11px;
+      background: rgba(255,255,255,0.07);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: #c8d0dc;
+    }
   </style>
 </head>
 <body>
-  <h1>ToS Clarity — Privacy Policy</h1>
-  <p class="subtitle">Last updated: May 2026</p>
+  <h1>Privacy Policy</h1>
+  <p class="subtitle">ToS Clarity Chrome Extension &nbsp;·&nbsp; Last updated: May 2026</p>
 
   <div class="highlight">
-    ToS Clarity does not collect, store, or sell any personal data. No account is required.
+    ToS Clarity does not collect, store, or sell your personal data. No account is needed to use it.
   </div>
 
-  <h2>What data is processed</h2>
-  <p>When you click "Review Agreement", the extension:</p>
+  <h2>What actually happens when you use it</h2>
+  <p>When you click "Review Agreement", the extension reads the visible text on the page you're looking at and sends it (along with the page URL) to a backend server running locally on your own computer. That server then forwards the text to the Groq API, which runs an AI model to produce the analysis you see.</p>
+  <p>That's the whole flow. Nothing is saved anywhere once the analysis is done.</p>
+
+  <h2>What leaves your computer</h2>
+  <p>The only thing that leaves your machine is the document text and the URL of the page, which go to Groq's servers for processing. Groq handles this under their own <a href="https://groq.com/privacy-policy/" target="_blank">Privacy Policy</a> and <a href="https://groq.com/terms-of-use/" target="_blank">Terms of Use</a>. If that concerns you, you should read those before using this extension.</p>
+
+  <h2>What we never do</h2>
   <ul>
-    <li>Extracts the visible text of the current page</li>
-    <li>Sends the page URL and extracted text to the backend server running on your device</li>
+    <li>We don't record or store your browsing history</li>
+    <li>We don't keep copies of documents you analyze</li>
+    <li>We don't use cookies, analytics, or any tracking</li>
+    <li>We don't require an account or any personal information</li>
+    <li>We don't send data anywhere other than your local backend and Groq</li>
   </ul>
 
-  <h2>Where your data goes</h2>
-  <p>The backend server (running at <code>127.0.0.1:8000</code> by default) forwards the document text and URL to the <strong>Groq API</strong> for analysis using a Llama model. Groq's data handling is governed by the <a href="https://groq.com/privacy-policy/" target="_blank">Groq Privacy Policy</a> and <a href="https://groq.com/terms-of-use/" target="_blank">Terms of Use</a>.</p>
+  <h2>The local backend</h2>
+  <p>The backend server runs on your own machine at <code>127.0.0.1:8000</code> by default. It only holds data in memory for as long as a single request takes, then it's gone. Nothing is written to disk.</p>
 
-  <h2>What is NOT collected</h2>
-  <ul>
-    <li>No browsing history is recorded</li>
-    <li>No analysis results are stored by the extension</li>
-    <li>No data is sent to any server other than your local backend and the Gemini API</li>
-    <li>No cookies, tracking pixels, or analytics are used</li>
-  </ul>
-
-  <h2>Local backend</h2>
-  <p>The backend server runs entirely on your device. It does not persist any document text or analysis results to disk. Data exists only in memory for the duration of a single analysis request.</p>
-
-  <h2>Contact</h2>
-  <p>For questions or concerns, open an issue on the project's GitHub repository.</p>
+  <h2>Questions</h2>
+  <p>If something here is unclear or you have a concern, open an issue on the GitHub repository and we'll sort it out.</p>
 </body>
 </html>
