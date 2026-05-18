@@ -5,44 +5,77 @@
 ![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)
 ![Chrome Extension](https://img.shields.io/badge/Chrome_Extension-MV3-orange?logo=googlechrome&logoColor=white)
+![Groq](https://img.shields.io/badge/Powered_by-Groq-orange)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-ToS Clarity is a Chrome extension that reads Terms of Service and Privacy Policy pages for you and gives you a plain-English breakdown of what you're actually agreeing to — risk scores, hidden clauses, data collection practices, and more. Everything runs on your own machine; your documents never leave your computer.
+ToS Clarity is a Chrome extension that reads Terms of Service and Privacy Policy pages for you and gives you a plain-English breakdown of what you're actually agreeing to — risk scores, hidden clauses, data collection practices, and more. Document text is analyzed by Llama 3.3 70B via the [Groq API](https://groq.com).
 
 ---
 
 ## What It Does
 
 - Automatically detects when you're on a Terms of Service or Privacy Policy page
-- Extracts the relevant text and sends it to a local AI model on your machine
+- Extracts the relevant text and sends it to a local backend for analysis
 - Displays a results panel inside the browser with a full breakdown of the document
 - Scores the document on Privacy, Legal, and Lock-in risk (0–10 scale)
 - Highlights buried or one-sided clauses in plain English
+- Shows a setup screen if the backend isn't running, with a Retry button
+- Lets you configure the backend URL via the extension's Settings page
 
 ---
 
 ## Quick Start
 
-**You need:** [Ollama](https://ollama.com) installed, Python 3.11+, and Google Chrome.
+**You need:** A [Groq API key](https://console.groq.com/keys) (free), Python 3.11+, and Google Chrome.
+
+### 1. Set up the backend
 
 ```bash
-# 1. Download an AI model and start Ollama
-ollama pull llama3.1
-ollama serve
-
-# 2. Start the backend
 cd backend
 python -m venv venv
 venv\Scripts\activate          # Windows
 # source venv/bin/activate     # macOS / Linux
 pip install -r requirements.txt
-python main.py                 # runs on http://127.0.0.1:8000
-
-# 3. Load the extension in Chrome
-# Go to chrome://extensions → turn on Developer mode → click "Load unpacked" → select the /extension folder
 ```
 
-Once loaded, visit any Terms of Service or Privacy Policy page, click the **ToS Clarity** icon in your toolbar, and hit **Review Agreement**.
+Copy the example env file and add your Groq API key:
+
+```bash
+copy .env.example .env        # Windows
+# cp .env.example .env        # macOS / Linux
+```
+
+Open `backend/.env` and fill in your key:
+
+```
+GROQ_API_KEY=your_groq_api_key_here
+GROQ_MODEL=llama-3.3-70b-versatile
+MAX_CHUNK_TOKENS=3500
+BACKEND_PORT=8000
+```
+
+Start the server:
+
+```bash
+uvicorn main:app --reload
+```
+
+The backend runs on `http://127.0.0.1:8000`. Verify it's working:
+```
+http://127.0.0.1:8000/health
+```
+You should see: `{"status":"ok","model":"llama-3.3-70b-versatile","version":"1.0.0"}`
+
+### 2. Load the extension in Chrome
+
+1. Go to `chrome://extensions`
+2. Enable **Developer mode** (top-right toggle)
+3. Click **Load unpacked**
+4. Select the `/extension` folder from this project
+
+### 3. Use it
+
+Visit any Terms of Service or Privacy Policy page, click the **TC** icon in your toolbar, and hit **Review Agreement**. Results appear in a panel on the right side of the page in about 2–5 seconds.
 
 ---
 
@@ -64,14 +97,39 @@ Each analysis returns:
 
 ## Configuration
 
-Copy `backend/.env.example` to `backend/.env` and adjust as needed:
+Edit `backend/.env`:
 
 | Variable | Default | Description |
 |---|---|---|
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server URL |
-| `OLLAMA_MODEL` | `llama3.1` | Model to use (any Ollama-compatible model) |
+| `GROQ_API_KEY` | *(required)* | Your Groq API key from console.groq.com |
+| `GROQ_MODEL` | `llama-3.3-70b-versatile` | Any Groq-supported model |
 | `MAX_CHUNK_TOKENS` | `3500` | Max tokens per analysis chunk |
 | `BACKEND_PORT` | `8000` | Port the FastAPI server listens on |
+
+To change the backend URL from inside the extension (e.g. different port), go to `chrome://extensions` → **ToS Clarity** → **Details** → **Extension options**.
+
+---
+
+## Troubleshooting
+
+**Popup shows "Backend not running"**
+- Make sure the backend server is running (`uvicorn main:app --reload`)
+- Click **Retry Connection** in the popup
+
+**Analysis error: 429 / quota exceeded**
+- Your Groq key has hit its rate limit — wait a minute and try again
+- Free tier allows 30 requests/min and 14,400 requests/day
+
+**"No legal content detected"**
+- The extension ran on a page without ToS/legal text
+- Try an actual Terms of Service URL (e.g. `https://policies.google.com/terms`)
+
+**Extension not responding after installing**
+- Reload the page — content scripts only inject on pages loaded after the extension is installed
+- If still stuck, go to `chrome://extensions` and click the refresh icon on ToS Clarity
+
+**Analysis takes too long or times out**
+- Large documents are chunked and analyzed concurrently — very long documents (500K+ characters) are capped and a note is appended to results
 
 ---
 
@@ -84,7 +142,7 @@ Copy `backend/.env.example` to `backend/.env` and adjust as needed:
 
 ### 2. Chunking with paragraph-boundary awareness
 
-Large documents are split by `chunker.py` at double-newline paragraph boundaries so that no chunk exceeds the configured token limit (default 3 500 tokens, approximated as `len(text) // 4`). When a single paragraph exceeds the limit, a fallback splitter divides it at sentence-ending punctuation. This guarantees semantic coherence within each chunk.
+Large documents are split by `chunker.py` at double-newline paragraph boundaries so that no chunk exceeds the configured token limit (default 3,500 tokens, approximated as `len(text) // 4`). When a single paragraph exceeds the limit, a fallback splitter divides it at sentence-ending punctuation. This guarantees semantic coherence within each chunk.
 
 ### 3. Concurrent chunk analysis
 
@@ -92,7 +150,7 @@ Large documents are split by `chunker.py` at double-newline paragraph boundaries
 
 ### 4. Near-duplicate deduplication
 
-When results from multiple chunks are merged, `deduplicate_list()` removes near-duplicate findings using **Jaccard token overlap** with an 82 % threshold. This avoids requiring an embedding model while still catching paraphrased duplicates — e.g. *"collects your email address"* and *"email address is collected"* collapse into one entry.
+When results from multiple chunks are merged, `deduplicate_list()` removes near-duplicate findings using **Jaccard token overlap** with an 82% threshold. This avoids requiring an embedding model while still catching paraphrased duplicates — e.g. *"collects your email address"* and *"email address is collected"* collapse into one entry.
 
 ### 5. Conservative risk score merging
 
@@ -105,6 +163,10 @@ All LLM calls use `temperature=0.1`. Legal analysis requires precision and consi
 ### 7. Dual-world Chrome extension architecture
 
 Chrome MV3 extensions run content scripts in an `ISOLATED` world and injected scripts in the `MAIN` world (same JS context as the page). `background.js` injects `overlay.js` into the MAIN world so it can manipulate the page DOM freely, while `content_script.js` stays in the ISOLATED world to safely access `chrome.*` APIs. The two communicate via `CustomEvent` on the shared `document` object.
+
+### 8. Backend URL configurability
+
+The backend URL defaults to `http://127.0.0.1:8000` but is stored in `chrome.storage.sync` and can be changed via the extension's options page — useful if you run the backend on a different port.
 
 </details>
 
@@ -129,14 +191,14 @@ flowchart LR
     end
 
     subgraph llm["LLM Provider"]
-        OL["Ollama  (local)\nllama3.1 / mistral"]
+        GR["Groq API\nLlama 3.3 70B"]
     end
 
     IP -->|"CustomEvent: tos-popup-analyze-request"| CS
     CS -->|"POST /analyze  {url, text}"| API
     API --> AZ
     AZ --> CH
-    AZ <-->|"OpenAI-compat API  /v1"| OL
+    AZ <-->|"OpenAI-compat API"| GR
     AZ --> PR
     API -->|"JSON  AnalyzeResponse"| CS
     CS -->|"CustomEvent: tos-clarity-show"| OV
@@ -151,24 +213,28 @@ flowchart LR
 ```
 quant_project/
 ├── backend/
-│   ├── main.py            # FastAPI server — /analyze, /health
+│   ├── main.py            # FastAPI server — /analyze, /health, rate limiting
 │   ├── analyzer.py        # LLM orchestration, chunking, result merging
 │   ├── chunker.py         # Text splitting + Jaccard deduplication
 │   ├── models.py          # Pydantic request/response schemas
 │   ├── prompts.py         # System + user prompt templates
 │   ├── requirements.txt
 │   ├── requirements-dev.txt
+│   ├── .env.example       # Copy to .env and add your Groq key
 │   └── tests/
 │       ├── conftest.py
 │       ├── test_chunker.py
 │       ├── test_models.py
 │       └── test_analyzer.py
 └── extension/
-    ├── manifest.json      # Chrome MV3 manifest
+    ├── manifest.json      # Chrome MV3 manifest (v1.1.0)
     ├── background.js      # Service worker — injects scripts on icon click
     ├── content_script.js  # Page detection, text extraction, API bridge
+    ├── popup.html/js      # Toolbar popup with health check + onboarding
     ├── injected_popup.js  # Floating toggle panel (MAIN world)
-    └── overlay.js         # Full results overlay (MAIN world)
+    ├── overlay.js/css     # Full results overlay (MAIN world)
+    ├── options.html/js    # Settings page — configure backend URL
+    └── privacy_policy.html
 ```
 
 ---
@@ -180,6 +246,12 @@ cd backend
 pip install -r requirements-dev.txt
 pytest tests/ -v
 ```
+
+---
+
+## Privacy
+
+Document text is sent to the [Groq API](https://groq.com) for analysis. No data is stored by this extension. See [extension/privacy_policy.html](extension/privacy_policy.html) for full details.
 
 ---
 
