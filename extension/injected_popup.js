@@ -1,9 +1,67 @@
 /* Injected popup panel — runs in page main world via chrome.scripting */
 window._tcpLoaded = true;
 
-const _DOC_ICON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`;
-const _SEARCH_ICON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`;
-const _CHEVRON_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+// ── DOM helpers (no innerHTML — required for Trusted Types compatibility) ──
+
+function _el(tag, cls, children) {
+  const el = document.createElement(tag);
+  if (cls) el.className = cls;
+  if (children) children.forEach(c => c && el.appendChild(c));
+  return el;
+}
+
+function _txt(tag, cls, text) {
+  const el = document.createElement(tag);
+  if (cls) el.className = cls;
+  el.textContent = text;
+  return el;
+}
+
+function _svgNS(tag, attrs) {
+  const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+function _makeDocIcon() {
+  const s = _svgNS("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": "1.8", "stroke-linecap": "round", "stroke-linejoin": "round" });
+  s.appendChild(_svgNS("path", { d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" }));
+  s.appendChild(_svgNS("polyline", { points: "14 2 14 8 20 8" }));
+  s.appendChild(_svgNS("line", { x1: "16", y1: "13", x2: "8", y2: "13" }));
+  s.appendChild(_svgNS("line", { x1: "16", y1: "17", x2: "8", y2: "17" }));
+  return s;
+}
+
+function _makeSearchIcon() {
+  const s = _svgNS("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": "1.8", "stroke-linecap": "round", "stroke-linejoin": "round" });
+  s.appendChild(_svgNS("circle", { cx: "11", cy: "11", r: "8" }));
+  s.appendChild(_svgNS("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" }));
+  return s;
+}
+
+function _makeChevronIcon() {
+  const s = _svgNS("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": "2", "stroke-linecap": "round", "stroke-linejoin": "round" });
+  s.appendChild(_svgNS("polyline", { points: "9 18 15 12 9 6" }));
+  return s;
+}
+
+function _makeBadgeRow(iconCls, dotCls, titleText, subText) {
+  const icon = _el("div", `tcp-row-icon ${iconCls}`, [_makeDocIcon()]);
+  const body = _el("div", "tcp-row-body", [
+    _txt("div", "tcp-row-title", titleText),
+    _txt("div", "tcp-row-sub", subText),
+  ]);
+  const dot = _el("div", `tcp-status-dot ${dotCls}`);
+  return _el("div", "tcp-status-row", [icon, body, dot]);
+}
+
+function _hr() {
+  const el = document.createElement("hr");
+  el.className = "tcp-divider";
+  return el;
+}
+
+// ── Remove ────────────────────────────────────────────────────────────────
 
 function _tcpRemove() {
   const el = document.getElementById("tos-clarity-popup");
@@ -12,58 +70,61 @@ function _tcpRemove() {
   document.removeEventListener("keydown", _tcpEscKey);
 }
 
+// ── Create ────────────────────────────────────────────────────────────────
+
 function _tcpCreate() {
   _tcpRemove();
 
+  // Header
+  const header = _el("div", "tcp-header", [
+    _el("div", "tcp-logo-icon", [_txt("span", null, "TC")]),
+    _el("div", null, [
+      _txt("div", "tcp-app-name", "ToS Clarity"),
+      _txt("div", "tcp-app-sub", "Legal document analysis"),
+    ]),
+  ]);
+
+  // Badge
+  const badge = _el("div", null, [
+    _makeBadgeRow("tcp-unknown", "tcp-unknown", "Checking page…", "Detecting agreement"),
+  ]);
+  badge.id = "tcp-badge";
+
+  // Analyze button
+  const btnLabel = _txt("span", "tcp-btn-label", "Review Agreement");
+  const btnDesc  = _txt("span", "tcp-btn-desc", "Analyze this document");
+  const btn = _el("button", "tcp-analyze-btn", [
+    _el("div", "tcp-btn-icon", [_makeSearchIcon()]),
+    _el("div", "tcp-btn-body", [btnLabel, btnDesc]),
+    _el("span", "tcp-btn-arrow", [_makeChevronIcon()]),
+  ]);
+  btn.id = "tcp-analyze-btn";
+
+  // Status
+  const statusDiv = _el("div", "tcp-status-msg");
+  statusDiv.id = "tcp-status";
+
+  // Footer
+  const footer = _txt("div", "tcp-footer", "Powered by Groq");
+
+  // Assemble panel
   const panel = document.createElement("div");
   panel.id = "tos-clarity-popup";
-  panel.innerHTML = `
-    <div class="tcp-header">
-      <div class="tcp-logo-icon"><span>TC</span></div>
-      <div>
-        <div class="tcp-app-name">ToS Clarity</div>
-        <div class="tcp-app-sub">Legal document analysis</div>
-      </div>
-    </div>
-    <hr class="tcp-divider" />
-    <div id="tcp-badge">
-      <div class="tcp-status-row">
-        <div class="tcp-row-icon tcp-unknown">${_DOC_ICON}</div>
-        <div class="tcp-row-body">
-          <div class="tcp-row-title">Checking page…</div>
-          <div class="tcp-row-sub">Detecting agreement</div>
-        </div>
-        <div class="tcp-status-dot tcp-unknown"></div>
-      </div>
-    </div>
-    <hr class="tcp-divider" />
-    <button class="tcp-analyze-btn" id="tcp-analyze-btn">
-      <div class="tcp-btn-icon">${_SEARCH_ICON}</div>
-      <div class="tcp-btn-body">
-        <span class="tcp-btn-label">Review Agreement</span>
-        <span class="tcp-btn-desc">Analyze this document</span>
-      </div>
-      <span class="tcp-btn-arrow">${_CHEVRON_ICON}</span>
-    </button>
-    <div id="tcp-status" class="tcp-status-msg"></div>
-    <hr class="tcp-divider" />
-    <div class="tcp-footer">Powered by Groq</div>
-  `;
+  [header, _hr(), badge, _hr(), btn, statusDiv, _hr(), footer]
+    .forEach(c => panel.appendChild(c));
 
   document.body.appendChild(panel);
-
-  // Animate in
   requestAnimationFrame(() => requestAnimationFrame(() => panel.classList.add("tcp-open")));
 
-  document.getElementById("tcp-analyze-btn").addEventListener("click", () => {
+  btn.addEventListener("click", () => {
     try {
-      const btn = document.getElementById("tcp-analyze-btn");
-      if (!btn) return;
-      const labelEl = btn.querySelector(".tcp-btn-label");
-      const descEl  = btn.querySelector(".tcp-btn-desc");
-      btn.disabled = true;
-      if (labelEl) labelEl.textContent = "Analyzing…";
-      if (descEl)  descEl.textContent  = "This may take 15–30 seconds";
+      const b = document.getElementById("tcp-analyze-btn");
+      if (!b) return;
+      b.disabled = true;
+      const lbl = b.querySelector(".tcp-btn-label");
+      const dsc = b.querySelector(".tcp-btn-desc");
+      if (lbl) lbl.textContent = "Analyzing…";
+      if (dsc) dsc.textContent = "This may take 15–30 seconds";
       _tcpSetStatus("", "");
       document.dispatchEvent(new CustomEvent("tos-popup-analyze-request"));
     } catch (e) {
@@ -73,8 +134,6 @@ function _tcpCreate() {
 
   document.addEventListener("mousedown", _tcpOutsideClick);
   document.addEventListener("keydown", _tcpEscKey);
-
-  // Ask content script to check the page
   document.dispatchEvent(new CustomEvent("tos-popup-check-page"));
 }
 
@@ -97,32 +156,22 @@ function _tcpSetStatus(msg, cls) {
 function _tcpSetBadge(isToS) {
   const badge = document.getElementById("tcp-badge");
   if (!badge) return;
+  while (badge.firstChild) badge.removeChild(badge.firstChild);
+
   if (isToS) {
-    badge.innerHTML = `
-      <div class="tcp-status-row">
-        <div class="tcp-row-icon tcp-detected">${_DOC_ICON}</div>
-        <div class="tcp-row-body">
-          <div class="tcp-row-title">Agreement detected</div>
-          <div class="tcp-row-sub">Legal document on this page</div>
-        </div>
-        <div class="tcp-status-dot tcp-detected"></div>
-      </div>`;
+    badge.appendChild(_makeBadgeRow("tcp-detected", "tcp-detected", "Agreement detected", "Legal document on this page"));
   } else {
-    badge.innerHTML = `
-      <div class="tcp-status-row">
-        <div class="tcp-row-icon tcp-unknown">${_DOC_ICON}</div>
-        <div class="tcp-row-body">
-          <div class="tcp-row-title">No agreement found</div>
-          <div class="tcp-row-sub">Not a legal document</div>
-        </div>
-        <div class="tcp-status-dot tcp-unknown"></div>
-      </div>`;
+    badge.appendChild(_makeBadgeRow("tcp-unknown", "tcp-unknown", "No agreement found", "Not a legal document"));
     const btn = document.getElementById("tcp-analyze-btn");
-    if (btn) btn.querySelector(".tcp-btn-label").textContent = "Review Anyway";
+    if (btn) {
+      const lbl = btn.querySelector(".tcp-btn-label");
+      if (lbl) lbl.textContent = "Review Anyway";
+    }
   }
 }
 
-// Events fired by content_script.js
+// ── Events ────────────────────────────────────────────────────────────────
+
 document.addEventListener("tos-popup-toggle", () => {
   if (document.getElementById("tos-clarity-popup")) {
     _tcpRemove();
@@ -140,8 +189,10 @@ document.addEventListener("tos-popup-status", (e) => {
   const btn = document.getElementById("tcp-analyze-btn");
   if (btn) {
     btn.disabled = false;
-    btn.querySelector(".tcp-btn-label").textContent = "Review Agreement";
-    btn.querySelector(".tcp-btn-desc").textContent  = "Analyze this document";
+    const lbl = btn.querySelector(".tcp-btn-label");
+    const dsc = btn.querySelector(".tcp-btn-desc");
+    if (lbl) lbl.textContent = "Review Agreement";
+    if (dsc) dsc.textContent = "Analyze this document";
   }
   const cls = type === "success" ? "tcp-success" : type === "error" ? "tcp-error" : "";
   _tcpSetStatus(message, cls);

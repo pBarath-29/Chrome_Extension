@@ -281,14 +281,20 @@
       font-size: 10px;
       color: #4a5a70;
       text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
     .footer a {
-      color: #5a7090;
+      color: #8896a8;
       text-decoration: none;
+      border-bottom: 1px solid rgba(136, 150, 168, 0.35);
+      padding-bottom: 1px;
     }
 
-    .footer a:hover { text-decoration: underline; }
+    .footer a:hover { color: #c8d0dc; border-bottom-color: #c8d0dc; }
   </style>
 </head>
 <body>
@@ -342,8 +348,9 @@
   <hr class="divider" />
 
   <div class="footer">
-    Powered by Groq &nbsp;·&nbsp;
-    <a href="#" id="privacy-link">Privacy</a>
+    <span>Powered by Groq</span>
+    <span style="color:#2a3348">·</span>
+    <a href="#" id="privacy-link">Privacy Policy</a>
   </div>
 
   <script src="popup.js"></script>
