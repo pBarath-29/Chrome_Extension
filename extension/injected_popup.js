@@ -105,7 +105,15 @@ function _tcpCreate() {
   statusDiv.id = "tcp-status";
 
   // Footer
-  const footer = _txt("div", "tcp-footer", "Powered by Groq");
+  const footerGroq = _txt("span", null, "Powered by Groq");
+  const footerDot  = _txt("span", "tcp-footer-dot", "·");
+  const footerLink = _txt("a", "tcp-footer-link", "Privacy Policy");
+  footerLink.href = "#";
+  footerLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    document.dispatchEvent(new CustomEvent("tos-open-privacy"));
+  });
+  const footer = _el("div", "tcp-footer", [footerGroq, footerDot, footerLink]);
 
   // Assemble panel
   const panel = document.createElement("div");

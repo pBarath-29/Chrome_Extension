@@ -2,6 +2,13 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log("ToS Clarity installed.");
 });
 
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.action === "OPEN_PRIVACY") {
+    chrome.tabs.create({ url: chrome.runtime.getURL("privacy_policy.html") });
+    sendResponse({});
+  }
+});
+
 // Per-tab injection lock to prevent duplicate scripts on rapid double-clicks
 const _injecting = new Set();
 

@@ -115,6 +115,10 @@ function ensureOverlayScript(callback) {
 
 // ─── Injected-popup CustomEvent bridge ───────────────────────────────────────
 
+document.addEventListener("tos-open-privacy", () => {
+  chrome.runtime.sendMessage({ action: "OPEN_PRIVACY" });
+});
+
 document.addEventListener("tos-popup-check-page", () => {
   document.dispatchEvent(new CustomEvent("tos-popup-page-result", {
     detail: { isToS: isToSPage() },
