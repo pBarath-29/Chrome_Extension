@@ -19,9 +19,11 @@ const URL_KEYWORDS = [
 
 // Backend URL — loaded from storage, falls back to default
 let _backendUrl = "http://127.0.0.1:8000";
-chrome.storage.sync.get({ backendUrl: "http://127.0.0.1:8000" }, (result) => {
-  _backendUrl = result.backendUrl;
-});
+try {
+  chrome.storage.sync.get({ backendUrl: "http://127.0.0.1:8000" }, (result) => {
+    _backendUrl = result.backendUrl;
+  });
+} catch (_) {}
 
 // ─── Page Detection ──────────────────────────────────────────────────────────
 
@@ -116,7 +118,7 @@ function ensureOverlayScript(callback) {
 // ─── Injected-popup CustomEvent bridge ───────────────────────────────────────
 
 document.addEventListener("tos-open-privacy", () => {
-  chrome.runtime.sendMessage({ action: "OPEN_PRIVACY" });
+  try { chrome.runtime.sendMessage({ action: "OPEN_PRIVACY" }); } catch (_) {}
 });
 
 document.addEventListener("tos-popup-check-page", () => {
@@ -161,7 +163,7 @@ document.addEventListener("tos-popup-analyze-request", () => {
 
 // ─── Message Handler ─────────────────────────────────────────────────────────
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+try { chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.action === "CHECK_PAGE") {
     sendResponse({ isToS: isToSPage() });
     return false;
@@ -200,4 +202,4 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     sendResponse({ success: true });
     return false;
   }
-});
+}); } catch (_) {}
