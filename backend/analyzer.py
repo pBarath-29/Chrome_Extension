@@ -9,12 +9,13 @@ from models import AnalyzeResponse, RiskScores
 from prompts import SYSTEM_PROMPT, build_user_prompt
 from chunker import count_tokens, chunk_text, deduplicate_list
 
-_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+_OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1")
 _MAX_CHUNK_TOKENS = int(os.getenv("MAX_CHUNK_TOKENS", "3500"))
 
 _client = AsyncOpenAI(
-    base_url="https://api.groq.com/openai/v1",
-    api_key=os.getenv("GROQ_API_KEY"),
+    base_url=f"{_OLLAMA_BASE_URL}/v1",
+    api_key="ollama",
 )
 
 

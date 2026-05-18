@@ -78,15 +78,14 @@
   <p class="subtitle">ToS Clarity Chrome Extension &nbsp;·&nbsp; Last updated: May 2026</p>
 
   <div class="highlight">
-    ToS Clarity does not collect, store, or sell your personal data. No account is needed to use it.
+    ToS Clarity runs entirely on your own machine. Your documents never leave your device.
   </div>
 
   <h2>What actually happens when you use it</h2>
-  <p>When you click "Review Agreement", the extension reads the visible text on the page you're looking at and sends it (along with the page URL) to a backend server running locally on your own computer. That server then forwards the text to the Groq API, which runs an AI model to produce the analysis you see.</p>
-  <p>That's the whole flow. Nothing is saved anywhere once the analysis is done.</p>
+  <p>When you click "Review Agreement", the extension reads the visible text on the page and sends it to a backend server running locally on your computer at <code>127.0.0.1:8000</code>. That server passes the text to Ollama, an AI model also running locally on your machine. The result comes straight back to the extension. Nothing ever touches the internet.</p>
 
   <h2>What leaves your computer</h2>
-  <p>The only thing that leaves your machine is the document text and the URL of the page, which go to Groq's servers for processing. Groq handles this under their own <a href="https://groq.com/privacy-policy/" target="_blank">Privacy Policy</a> and <a href="https://groq.com/terms-of-use/" target="_blank">Terms of Use</a>. If that concerns you, you should read those before using this extension.</p>
+  <p>Nothing. The entire pipeline runs on your own hardware. The extension talks to your local backend, which talks to your local Ollama instance. No data is sent to any external server, API, or third party.</p>
 
   <h2>What we never do</h2>
   <ul>
@@ -94,11 +93,11 @@
     <li>We don't keep copies of documents you analyze</li>
     <li>We don't use cookies, analytics, or any tracking</li>
     <li>We don't require an account or any personal information</li>
-    <li>We don't send data anywhere other than your local backend and Groq</li>
+    <li>We don't send your data anywhere outside your own machine</li>
   </ul>
 
   <h2>The local backend</h2>
-  <p>The backend server runs on your own machine at <code>127.0.0.1:8000</code> by default. It only holds data in memory for as long as a single request takes, then it's gone. Nothing is written to disk.</p>
+  <p>The backend server runs at <code>127.0.0.1:8000</code> by default and only accepts connections from your own device. It holds data in memory only for the duration of a single analysis request, then it's gone. Nothing is written to disk.</p>
 
   <h2>Questions</h2>
   <p>If something here is unclear or you have a concern, reach out at <a href="mailto:pbarath29@gmail.com">pbarath29@gmail.com</a> and I'll get back to you.</p>

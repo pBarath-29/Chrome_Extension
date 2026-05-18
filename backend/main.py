@@ -16,7 +16,7 @@ from analyzer import analyze_text
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
-_GEMINI_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1")
 
 _rate_store: dict = defaultdict(list)
 _RATE_LIMIT = 10
@@ -58,7 +58,7 @@ def _is_valid_url(url: str) -> bool:
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "model": _GEMINI_MODEL, "version": "1.0.0"}
+    return {"status": "ok", "model": _OLLAMA_MODEL, "version": "1.0.0"}
 
 
 @app.post("/analyze", response_model=AnalyzeResponse)

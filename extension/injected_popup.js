@@ -105,7 +105,7 @@ function _tcpCreate() {
   statusDiv.id = "tcp-status";
 
   // Footer
-  const footerGroq = _txt("span", null, "Powered by Groq");
+  const footerGroq = _txt("span", null, "Runs locally on your device");
   const footerDot  = _txt("span", "tcp-footer-dot", "·");
   const footerLink = _txt("a", "tcp-footer-link", "Privacy Policy");
   footerLink.href = "#";
