@@ -1,0 +1,15 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Env
+backend/.env
+
+# OS
+desktop.ini
+.DS_Store
+Thumbs.db

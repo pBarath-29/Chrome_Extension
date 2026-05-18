@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ToS Clarity</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { background: #0a0d12; }
+
+    body {
+      width: 310px;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0a0d12;
+      color: #c8d0dc;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      box-shadow:
+        0 24px 56px rgba(0, 0, 0, 0.55),
+        0 4px 16px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+      animation: _tc-in 0.14s ease-out;
+    }
+
+    @keyframes _tc-in {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Header ── */
+    .popup-header {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 16px 16px 14px;
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      background: rgba(196, 154, 74, 0.26);
+      border: 1px solid rgba(196, 154, 74, 0.45);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-icon span {
+      font-size: 11px;
+      font-weight: 600;
+      color: #e8c070;
+      letter-spacing: -0.5px;
+    }
+
+    .app-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #f4f6fa;
+      letter-spacing: -0.3px;
+    }
+
+    .app-sub {
+      font-size: 11px;
+      color: #8896a8;
+      margin-top: 1px;
+    }
+
+    /* ── Dividers ── */
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* ── Status row (injected by JS into #page-badge) ── */
+    #page-badge { padding: 4px 16px; }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+    }
+
+    .row-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .row-icon.detected {
+      background: rgba(106, 171, 126, 0.26);
+      border: 1px solid rgba(106, 171, 126, 0.42);
+      color: #7ec893;
+    }
+
+    .row-icon.unknown {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      color: #5a6880;
+    }
+
+    .row-body { flex: 1; min-width: 0; }
+
+    .row-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #f4f6fa;
+    }
+
+    .row-sub {
+      font-size: 11px;
+      color: #8896a8;
+      margin-top: 2px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-dot.detected {
+      background: #6aab7e;
+      box-shadow: 0 0 6px rgba(106, 171, 126, 0.55);
+    }
+
+    .status-dot.unknown { background: #2a3348; }
+
+    /* ── Action button — styled as a row ── */
+    #analyze-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+
+    #analyze-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    #analyze-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(196, 154, 74, 0.26);
+      border: 1px solid rgba(196, 154, 74, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: #e8c070;
+    }
+
+    .btn-body { flex: 1; min-width: 0; }
+
+    .btn-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #f4f6fa;
+      display: block;
+    }
+
+    .btn-desc {
+      font-size: 11px;
+      color: #8896a8;
+      display: block;
+      margin-top: 2px;
+    }
+
+    .btn-arrow { color: #3d5068; flex-shrink: 0; }
+
+    /* ── Status message ── */
+    #status {
+      font-size: 11px;
+      color: #64748b;
+      text-align: center;
+      line-height: 1.4;
+      min-height: 0;
+      padding: 0 16px;
+    }
+
+    #status:not(:empty) { padding: 6px 16px 10px; }
+    #status.error   { color: #c0635a; }
+    #status.success { color: #6aab7e; }
+
+    /* ── Footer ── */
+    .footer {
+      padding: 10px 16px 14px;
+      font-size: 10px;
+      color: #4a5a70;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="popup-header">
+    <div class="logo-icon"><span>TC</span></div>
+    <div>
+      <div class="app-name">ToS Clarity</div>
+      <div class="app-sub">Legal document analysis</div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <div id="page-badge"></div>
+
+  <hr class="divider" />
+
+  <button id="analyze-btn">
+    <div class="btn-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </div>
+    <div class="btn-body">
+      <span class="btn-label">Review Agreement</span>
+      <span class="btn-desc">Analyze this document</span>
+    </div>
+    <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 18 15 12 9 6"/>
+    </svg>
+  </button>
+
+  <div id="status"></div>
+
+  <hr class="divider" />
+
+  <div class="footer">Runs locally on your device</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

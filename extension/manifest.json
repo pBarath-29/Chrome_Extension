@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "ToS Clarity",
+  "version": "1.0.0",
+  "description": "Understand what you're agreeing to with the help of an AI-powered Terms of Service and Privacy Policy interpreter",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:8000/*",
+    "<all_urls>"
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content_script.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["overlay.css", "overlay.js", "injected_popup.css", "injected_popup.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
